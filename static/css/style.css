@@ -1,0 +1,48 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f7f7f7;
+    color: #222;
+}
+
+nav {
+    background: #1f3c88;
+    padding: 1rem;
+}
+
+nav a, nav button {
+    color: white;
+    margin-right: 1rem;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+}
+
+main {
+    max-width: 900px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+}
+
+.messages {
+    max-width: 900px;
+    margin: 1rem auto;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+}
+
+.message.success {
+    background: #d1fae5;
+}
+
+.message.error {
+    background: #fee2e2;
+}
