@@ -112,12 +112,6 @@ Visit: `http://127.0.0.1:8000/`
 1. Access admin panel at `/admin/`
 2. Moderate reports, manage users, and handle categories
 
-## Team Roles
-
-- **Person 1**: Foundation, authentication, integration
-- **Person 2**: Models, forms, CRUD operations
-- **Person 3**: Search, filtering, testing, polish
-
 ## Notes
 
 ### Automatic Default Categories
