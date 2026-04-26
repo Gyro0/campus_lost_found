@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report.title }} | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<article class="page-section report-detail-page">
+    <h1 class="page-title">{{ report.title }}</h1>
+
+    <div class="detail-meta-list">
+        <p class="detail-meta"><strong>Type:</strong> {{ report.get_report_type_display }}</p>
+        <p class="detail-meta"><strong>Status:</strong> {{ report.get_status_display }}</p>
+        <p class="detail-meta"><strong>Category:</strong> {{ report.category|default:"Uncategorized" }}</p>
+        <p class="detail-meta"><strong>Location:</strong> {{ report.location }}</p>
+        <p class="detail-meta"><strong>Event Date:</strong> {{ report.event_date }}</p>
+        <p class="detail-meta"><strong>Posted by:</strong> {{ report.user.username }}</p>
+    </div>
+
+    {% if report.contact_info %}
+        <p class="detail-meta"><strong>Contact:</strong> {{ report.contact_info }}</p>
+    {% endif %}
+
+    {% if report.image %}
+        <img class="report-image" src="{{ report.image.url }}" alt="{{ report.title }}">
+    {% endif %}
+
+    <div class="description-box">
+        <p>{{ report.description }}</p>
+    </div>
+
+    {% if is_owner %}
+        <div class="owner-actions action-row">
+            <a class="btn btn-primary" href="{% url 'reports:edit' report.pk %}">Edit</a>
+            <a class="btn btn-outline" href="{% url 'reports:delete' report.pk %}">Delete</a>
+
+            {% if report.status != "RECOVERED" %}
+                <form class="inline-form" method="post" action="{% url 'reports:recover' report.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-primary" type="submit">Mark Recovered</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+</article>
+{% endblock %}

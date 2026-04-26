@@ -3,16 +3,18 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<h1>Create an account</h1>
+<section class="page-section auth-section">
+<h1 class="page-title">Create an account</h1>
 
-<form method="post">
+<form class="form-stack auth-form" method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Register</button>
+    <button class="btn btn-primary" type="submit">Register</button>
 </form>
 
-<p>
+<p class="muted-copy">
     Already have an account?
-    <a href="{% url 'login' %}">Login here</a>
+    <a class="text-link" href="{% url 'login' %}">Login here</a>
 </p>
+</section>
 {% endblock %}

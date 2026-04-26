@@ -20,3 +20,7 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+.t/
+t/
+./t
