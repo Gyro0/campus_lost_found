@@ -9,6 +9,8 @@ A centralized Django web application for reporting, searching, and recovering lo
 - **Report Found Items**: Students can report items they've found
 - **Browse & Search**: Search and filter through all reports
 - **User Dashboard**: View and manage your own reports
+- **Report Lifecycle Actions**: View detail, edit, delete, and mark reports as recovered
+- **Automatic Category Seeding**: Default categories are created automatically when needed
 - **Admin Moderation**: Admin interface for moderating reports
 
 ## Tech Stack
@@ -95,7 +97,15 @@ Visit: `http://127.0.0.1:8000/`
 3. **Report a lost item** at `/reports/lost/new/`
 4. **Report a found item** at `/reports/found/new/`
 5. **Browse reports** at `/reports/`
-6. **View your reports** at `/reports/mine/`
+6. **View your reports** at `/reports/my-reports/`
+7. **View platform stats** at `/reports/stats/`
+
+### Report Lifecycle Routes (for contributors/testers)
+
+- **Report detail**: `/reports/<id>/`
+- **Edit report**: `/reports/<id>/edit/`
+- **Delete report**: `/reports/<id>/delete/`
+- **Mark as recovered**: `/reports/<id>/recover/`
 
 ### For Administrators
 
@@ -107,6 +117,16 @@ Visit: `http://127.0.0.1:8000/`
 - **Person 1**: Foundation, authentication, integration
 - **Person 2**: Models, forms, CRUD operations
 - **Person 3**: Search, filtering, testing, polish
+
+## Notes
+
+### Automatic Default Categories
+
+When no categories exist yet, the app auto-creates a default set when users open the reports listing. This keeps the category filter usable without manual admin setup.
+
+### Media Uploads (Development)
+
+Report images are uploaded to the `media/` directory. In development mode (`DEBUG=True`), media files are served by Django through URL configuration, so uploaded images display immediately.
 
 
 ## Common Commands
