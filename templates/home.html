@@ -3,19 +3,80 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h1>Campus Lost & Found</h1>
-<p>
-    A centralized platform to report, search, and recover lost or found items on campus.
-</p>
+<section class="page-section home-hero">
+    <h1 class="page-title">Campus Lost & Found</h1>
+    <p class="page-subtitle">
+        Helping students, staff, and visitors quickly reconnect with their belongings.
+    </p>
+    <p class="home-lead">
+        Losing something on campus can be stressful, especially during busy class schedules.
+        This platform gives you one clear place to post lost or found items, search existing reports,
+        and contact the right person faster. Instead of posting in multiple chats or asking around
+        building by building, you can manage everything in one organized space.
+    </p>
 
-<div>
-    <a href="{% url 'reports:report_list' %}">Browse Reports</a>
-    {% if user.is_authenticated %}
-        <a href="{% url 'reports:lost_create' %}">Report Lost Item</a>
-        <a href="{% url 'reports:found_create' %}">Report Found Item</a>
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Register</a>
-    {% endif %}
-</div>
+    <div class="action-row">
+        <a class="btn btn-primary" href="{% url 'reports:report_list' %}">Browse Reports</a>
+        <a class="btn btn-outline" href="{% url 'reports:stats' %}">View Stats</a>
+        {% if user.is_authenticated %}
+            <a class="btn btn-primary" href="{% url 'reports:lost_create' %}">Report Lost Item</a>
+            <a class="btn btn-primary" href="{% url 'reports:found_create' %}">Report Found Item</a>
+            <a class="btn btn-outline" href="{% url 'reports:my_reports' %}">My Reports</a>
+        {% else %}
+            <a class="btn btn-primary" href="{% url 'login' %}">Login</a>
+            <a class="btn btn-primary" href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="page-section">
+    <h2>How It Works</h2>
+    <div class="home-grid">
+        <article class="home-card">
+            <h3>1. Post Clear Details</h3>
+            <p>
+                Create a lost or found report with a good title, location, date, and item description.
+                Photos can improve match quality and reduce confusion.
+            </p>
+        </article>
+        <article class="home-card">
+            <h3>2. Search Smartly</h3>
+            <p>
+                Use filters by type, category, and status to quickly find similar reports.
+                This helps narrow down potential matches in a few clicks.
+            </p>
+        </article>
+        <article class="home-card">
+            <h3>3. Recover And Close</h3>
+            <p>
+                Once your item is returned, mark the report as recovered.
+                Keeping statuses updated helps others focus on unresolved items.
+            </p>
+        </article>
+    </div>
+</section>
+
+<section class="page-section">
+    <h2>Why Use This Platform</h2>
+    <p>
+        Campus Lost & Found creates a consistent process for everyone. Students can post quickly,
+        staff can verify details, and finders can report responsibly. The goal is simple: fewer lost
+        items left unclaimed and a smoother recovery process for the whole campus community.
+    </p>
+    <p class="muted-copy home-note">
+        Accurate reports save time for everyone. Include distinguishing details like color, brand,
+        unique marks, and where you last saw the item.
+    </p>
+</section>
+
+<section class="page-section">
+    <h2>Reporting Tips For Faster Matches</h2>
+    <ul class="home-list">
+        <li>Use a specific title, for example "Black Lenovo Laptop in Sleeve" instead of "Lost Laptop".</li>
+        <li>Describe the last known location as precisely as possible, such as building and floor.</li>
+        <li>Add one or two unique identifiers that only the owner would know.</li>
+        <li>Keep your contact information up to date so replies are not delayed.</li>
+        <li>Mark recovered reports quickly to keep search results clean.</li>
+    </ul>
+</section>
 {% endblock %}

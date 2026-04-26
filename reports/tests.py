@@ -382,6 +382,17 @@ def make_report(
     )
 
 
+class CategoryBootstrapTests(TestCase):
+    def test_report_list_seeds_categories_when_empty(self):
+        self.assertEqual(Category.objects.count(), 0)
+
+        response = self.client.get(reverse("reports:report_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(Category.objects.count(), 0)
+        self.assertContains(response, "All Categories")
+
+
 class PublicReportListViewTests(TestCase):
     def setUp(self):
         self.user = make_user()
