@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}My Reports | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<section>
+    <h1>My Reports</h1>
+
+    <div>
+        <p><strong>Total:</strong> {{ total }}</p>
+        <p><strong>Open:</strong> {{ open_count }}</p>
+        <p><strong>Recovered:</strong> {{ recovered_count }}</p>
+    </div>
+
+    <form method="get">
+        <select name="status">
+            <option value="">All Statuses</option>
+            <option value="open" {% if selected_status == "open" %}selected{% endif %}>Open</option>
+            <option value="recovered" {% if selected_status == "recovered" %}selected{% endif %}>Recovered</option>
+        </select>
+        <button type="submit">Apply</button>
+    </form>
+
+    {% if reports %}
+        <div>
+            {% for report in reports %}
+                <article>
+                    <h2><a href="{% url 'reports:detail' report.pk %}">{{ report.title }}</a></h2>
+                    <p><strong>Type:</strong> {{ report.get_report_type_display }}</p>
+                    <p><strong>Status:</strong> {{ report.get_status_display }}</p>
+                    <p><strong>Location:</strong> {{ report.location }}</p>
+                </article>
+                <hr>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You have not created any reports yet.</p>
+    {% endif %}
+
+    {% if page_obj.has_other_pages %}
+        <nav>
+            {% if page_obj.has_previous %}
+                <a href="?status={{ selected_status }}&page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a href="?status={{ selected_status }}&page={{ page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}
