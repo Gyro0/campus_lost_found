@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title|default:"Report Item" }} | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<section>
+    <h1>{{ title|default:"Report Item" }}</h1>
+
+    {% if report_type %}
+        <p>{{ report_type }} item submission</p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">
+            {% if is_edit %}Save Changes{% else %}Submit Report{% endif %}
+        </button>
+    </form>
+
+    {% if is_edit and object %}
+        <p><a href="{% url 'reports:detail' object.pk %}">Back to report</a></p>
+    {% endif %}
+</section>
+{% endblock %}

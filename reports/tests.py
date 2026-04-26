@@ -1,9 +1,10 @@
-from django.test import TestCase, Client
-from django.contrib.auth.models import User
-from django.urls import reverse
-from django.utils import timezone
 from datetime import date
+
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
 from .models import Category, Report
+
 
 
 class CategoryModelTests(TestCase):
@@ -358,3 +359,162 @@ class MarkRecoveredViewTests(TestCase):
         self.report.refresh_from_db()
         self.assertIsNotNone(self.report.recovered_at)
 
+def make_user(username="testuser", password="pass1234"):
+    return User.objects.create_user(username=username, password=password)
+
+
+def make_report(
+    user,
+    title="Lost Keys",
+    report_type=Report.ReportType.LOST,
+    status=Report.Status.OPEN,
+    category=None,
+):
+    return Report.objects.create(
+        user=user,
+        title=title,
+        description="Found near the library.",
+        location="Main Library",
+        event_date=date.today(),
+        report_type=report_type,
+        status=status,
+        category=category,
+    )
+
+
+class PublicReportListViewTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.category = Category.objects.create(name="Electronics")
+        self.report_one = make_report(
+            self.user,
+            title="Lost Phone",
+            report_type=Report.ReportType.LOST,
+            category=self.category,
+        )
+        self.report_two = make_report(
+            self.user,
+            title="Found Wallet",
+            report_type=Report.ReportType.FOUND,
+        )
+
+    def test_list_accessible_anonymously(self):
+        response = self.client.get(reverse("reports:report_list"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_list_shows_all_reports(self):
+        response = self.client.get(reverse("reports:report_list"))
+        self.assertContains(response, "Lost Phone")
+        self.assertContains(response, "Found Wallet")
+
+    def test_search_by_title(self):
+        response = self.client.get(reverse("reports:report_list"), {"q": "Phone"})
+        self.assertContains(response, "Lost Phone")
+        self.assertNotContains(response, "Found Wallet")
+
+    def test_search_by_location(self):
+        response = self.client.get(reverse("reports:report_list"), {"q": "library"})
+        self.assertContains(response, "Lost Phone")
+
+    def test_filter_by_type_lost(self):
+        response = self.client.get(reverse("reports:report_list"), {"type": Report.ReportType.LOST})
+        self.assertContains(response, "Lost Phone")
+        self.assertNotContains(response, "Found Wallet")
+
+    def test_filter_by_type_found(self):
+        response = self.client.get(reverse("reports:report_list"), {"type": Report.ReportType.FOUND})
+        self.assertContains(response, "Found Wallet")
+        self.assertNotContains(response, "Lost Phone")
+
+    def test_filter_by_category(self):
+        response = self.client.get(reverse("reports:report_list"), {"category": self.category.pk})
+        self.assertContains(response, "Lost Phone")
+        self.assertNotContains(response, "Found Wallet")
+
+    def test_filter_by_status_open(self):
+        make_report(self.user, title="Recovered Bag", status=Report.Status.RECOVERED)
+        response = self.client.get(reverse("reports:report_list"), {"status": "open"})
+        self.assertContains(response, "Lost Phone")
+        self.assertNotContains(response, "Recovered Bag")
+
+    def test_filter_by_status_recovered(self):
+        make_report(self.user, title="Recovered Bag", status=Report.Status.RECOVERED)
+        response = self.client.get(reverse("reports:report_list"), {"status": "recovered"})
+        self.assertContains(response, "Recovered Bag")
+        self.assertNotContains(response, "Lost Phone")
+
+    def test_pagination(self):
+        for i in range(15):
+            make_report(self.user, title=f"Item {i}")
+        response = self.client.get(reverse("reports:report_list"), {"page": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["page_obj"].has_next())
+
+
+class MyReportsViewTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.other = make_user("other", "pass1234")
+        self.my_report = make_report(self.user, title="My Lost Keys")
+        self.other_report = make_report(self.other, title="Other Report")
+
+    def test_my_reports_requires_login(self):
+        url = reverse("reports:my_reports")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(url, response.url)
+
+    def test_my_reports_shows_only_own_reports(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("reports:my_reports"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "My Lost Keys")
+        self.assertNotContains(response, "Other Report")
+
+    def test_my_reports_status_filter_open(self):
+        make_report(self.user, title="Recovered Item", status=Report.Status.RECOVERED)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("reports:my_reports"), {"status": "open"})
+        self.assertContains(response, "My Lost Keys")
+        self.assertNotContains(response, "Recovered Item")
+
+    def test_my_reports_status_filter_recovered(self):
+        make_report(self.user, title="Recovered Item", status=Report.Status.RECOVERED)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("reports:my_reports"), {"status": "recovered"})
+        self.assertContains(response, "Recovered Item")
+        self.assertNotContains(response, "My Lost Keys")
+
+    def test_my_reports_summary_counts(self):
+        make_report(self.user, title="Recovered", status=Report.Status.RECOVERED)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("reports:my_reports"))
+        self.assertEqual(response.context["total"], 2)
+        self.assertEqual(response.context["open_count"], 1)
+        self.assertEqual(response.context["recovered_count"], 1)
+
+
+class StatsViewTests(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.category = Category.objects.create(name="Accessories")
+        make_report(self.user, title="Lost A", report_type=Report.ReportType.LOST, category=self.category)
+        make_report(self.user, title="Found B", report_type=Report.ReportType.FOUND, category=self.category)
+        make_report(
+            self.user,
+            title="Recovered C",
+            report_type=Report.ReportType.LOST,
+            status=Report.Status.RECOVERED,
+            category=self.category,
+        )
+
+    def test_stats_accessible_anonymously(self):
+        response = self.client.get(reverse("reports:stats"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_stats_counts(self):
+        response = self.client.get(reverse("reports:stats"))
+        self.assertEqual(response.context["total_reports"], 3)
+        self.assertEqual(response.context["lost_count"], 2)
+        self.assertEqual(response.context["found_count"], 1)
+        self.assertEqual(response.context["recovered_count"], 1)

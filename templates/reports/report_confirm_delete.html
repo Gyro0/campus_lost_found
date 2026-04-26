@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Delete Report | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<section>
+    <h1>Delete Report</h1>
+    <p>Are you sure you want to delete "{{ object.title }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Confirm Delete</button>
+    </form>
+
+    <p><a href="{% url 'reports:detail' object.pk %}">Cancel</a></p>
+</section>
+{% endblock %}
