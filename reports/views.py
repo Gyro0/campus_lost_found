@@ -13,6 +13,27 @@ from .forms import ReportForm
 
 
 REPORTS_PER_PAGE = 10
+DEFAULT_CATEGORIES = (
+    "Accessories",
+    "Books",
+    "Clothing",
+    "Electronics",
+    "ID Card",
+    "Keys",
+    "Wallet",
+    "Water Bottle",
+    "Other",
+)
+
+
+def get_category_options():
+    """Return categories, auto-seeding defaults if none exist yet."""
+    if not Category.objects.exists():
+        Category.objects.bulk_create(
+            [Category(name=name) for name in DEFAULT_CATEGORIES],
+            ignore_conflicts=True,
+        )
+    return Category.objects.order_by("name")
 
 
 class OwnerRequiredMixin(UserPassesTestMixin):
@@ -167,7 +188,7 @@ def report_list(request):
     context = {
         "page_obj": page_obj,
         "reports": page_obj.object_list,
-        "categories": Category.objects.order_by("name"),
+        "categories": get_category_options(),
         "q": q,
         "selected_type": report_type,
         "selected_category": category_id,

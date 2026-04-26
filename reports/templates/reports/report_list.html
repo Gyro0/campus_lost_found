@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Reports | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<section class="page-section report-list-page">
+    <h1 class="page-title">Browse Reports</h1>
+
+    <form class="filter-form" method="get">
+        <input class="form-control" type="text" name="q" placeholder="Search reports" value="{{ q }}">
+
+        <select class="form-control" name="type">
+            <option value="">All Types</option>
+            <option value="LOST" {% if selected_type == "LOST" %}selected{% endif %}>Lost</option>
+            <option value="FOUND" {% if selected_type == "FOUND" %}selected{% endif %}>Found</option>
+        </select>
+
+        <select class="form-control" name="category">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select class="form-control" name="status">
+            <option value="">All Statuses</option>
+            <option value="open" {% if selected_status == "open" %}selected{% endif %}>Open</option>
+            <option value="recovered" {% if selected_status == "recovered" %}selected{% endif %}>Recovered</option>
+        </select>
+
+        <button class="btn btn-primary" type="submit">Filter</button>
+    </form>
+
+    {% if reports %}
+        <div class="report-grid">
+            {% for report in reports %}
+                <article class="report-card">
+                    <div class="report-card-body">
+                        <div class="report-card-content">
+                            <h2 class="report-card-title">
+                                <a class="text-link" href="{% url 'reports:detail' report.pk %}">{{ report.title }}</a>
+                            </h2>
+                            <p class="report-meta"><strong>Type:</strong> {{ report.get_report_type_display }}</p>
+                            <p class="report-meta"><strong>Status:</strong> {{ report.get_status_display }}</p>
+                            <p class="report-meta"><strong>Category:</strong> {{ report.category|default:"Uncategorized" }}</p>
+                            <p class="report-meta"><strong>Location:</strong> {{ report.location }}</p>
+                            <p class="report-summary">{{ report.description|truncatewords:25 }}</p>
+                        </div>
+
+                        <div class="report-card-media">
+                            {% if report.image %}
+                                <img class="report-list-image" src="{{ report.image.url }}" alt="{{ report.title }}">
+                            {% else %}
+                                <div class="report-image-placeholder">No photo</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="empty-state">No reports matched your search.</p>
+    {% endif %}
+
+    {% if page_obj.has_other_pages %}
+        <nav class="pagination-nav" aria-label="Reports pagination">
+            {% if page_obj.has_previous %}
+                <a class="text-link" href="?q={{ q }}&type={{ selected_type }}&category={{ selected_category }}&status={{ selected_status }}&page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+
+            <span class="page-indicator">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a class="text-link" href="?q={{ q }}&type={{ selected_type }}&category={{ selected_category }}&status={{ selected_status }}&page={{ page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Report Stats | Campus Lost & Found{% endblock %}
+
+{% block content %}
+<section class="page-section stats-page">
+    <h1 class="page-title">Report Statistics</h1>
+
+    <div class="stats-strip">
+        <p class="stat-item"><strong>Total Reports:</strong> {{ total_reports }}</p>
+        <p class="stat-item"><strong>Lost Reports:</strong> {{ lost_count }}</p>
+        <p class="stat-item"><strong>Found Reports:</strong> {{ found_count }}</p>
+        <p class="stat-item"><strong>Recovered Reports:</strong> {{ recovered_count }}</p>
+    </div>
+
+    <section class="sub-section">
+        <h2>Reports by Category</h2>
+        {% if by_category %}
+            <ul class="clean-list">
+                {% for category in by_category %}
+                    <li>{{ category.name }}: {{ category.report_count }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No category data available.</p>
+        {% endif %}
+    </section>
+
+    <section class="sub-section">
+        <h2>Recent Reports</h2>
+        {% if recent %}
+            <ul class="clean-list">
+                {% for report in recent %}
+                    <li>
+                        <a class="text-link" href="{% url 'reports:detail' report.pk %}">{{ report.title }}</a>
+                        - {{ report.get_report_type_display }} - {{ report.get_status_display }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-state">No recent reports yet.</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}
